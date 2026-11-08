@@ -6,7 +6,7 @@ bundled locally as `vis-network.min.js`, so the viewer works offline (double-cli
 `index.html`) with no external / CDN dependency.
 
 - **Figure 1** — marine chain, fine taxonomy (39 nodes / 152 edges)
-- **Figure 2** — marine (15 classes / 57 edges) vs mainland China (15 / 47)
+- **Figure 2** — marine (15 classes / 57 edges) vs inland earthquakes (14 / 44)
 - Click a node to light up its neighbours and dim the rest.
 - Colour by four-layer taxonomy or by degree; Chinese / English toggle.
 

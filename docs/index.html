@@ -100,10 +100,10 @@
 const I18N={
   zh:{
     ttl:"海洋地震灾害链网络",
-    desc:"基于 NHESS 论文数据的交互式复现。图 1 为 39 节点 / 152 条有向边的海洋灾害链细粒度网络;图 2 为统一到 15 个灾害类别后,海洋链与中国大陆链的对比;图 3 将三个样本外后报(out-of-sample hindcast)事件(2004 印度洋、1960 智利、2018 帕卢)叠加到图 1 的海洋网络上——红色边为这三个事件新增的边,节点没有新增。点击节点高亮其相连节点、点击边只高亮该边及两端节点,其余变暗;点击空白处复位。",
-    tab1:"图 1 · 海洋网络 (39 节点)", tab2:"图 2 · 海洋 vs 大陆 (15 类)", tab3:"图 3 · 三独立事件叠加",
+    desc:"基于 NHESS 论文数据的交互式复现。图 1 为 39 节点 / 152 条有向边的海洋灾害链细粒度网络;图 2 为统一到 15 个灾害类别后,海洋链与内陆地震链的对比;图 3 将三个独立检验事件(2004 印度洋、1960 智利、2018 帕卢)叠加到图 1 的海洋网络上——红色边为这三个事件新增的边,节点没有新增。点击节点高亮其相连节点、点击边只高亮该边及两端节点,其余变暗;点击空白处复位。",
+    tab1:"图 1 · 海洋网络 (39 节点)", tab2:"图 2 · 海洋 vs 内陆 (15 类)", tab3:"图 3 · 三独立事件叠加",
     lblColor:"着色:", optLayer:"按层级", optDegree:"按度 (黄→红)",
-    cap2a:"海洋链 · 15 类 (57 边)", cap2b:"中国大陆链 · 15 类 (47 边)",
+    cap2a:"海洋链 · 15 类 (57 边)", cap2b:"内陆地震链 · 14 类 (44 边)",
     cap3:"三个独立事件(2004 印度洋 / 1960 智利 / 2018 帕卢)叠加到海洋网络。新节点按层级着色;边:暗红 = 14 条新增边,黑 = 新事件已有边,灰 = 原网络边。点击任意节点,高亮其相连的节点与边,其余变暗。",
     legSize:"节点大小 = 总度数 (入 + 出)",
     foot:"数据与分类体系来自海洋地震灾害链手稿(Shi, Hu & Zhang),使用 vis-network 渲染。点击节点可追踪其耦合关系。",
@@ -113,10 +113,10 @@ const I18N={
   },
   en:{
     ttl:"Marine Seismic Hazard-Chain Network",
-    desc:"An interactive reproduction of the network figures from the marine seismic hazard-chain study. Figure 1 is the fine-grained marine chain (39 nodes, 152 directed edges); Figure 2 compares the marine and mainland-China chains after aggregating to 15 hazard classes; Figure 3 overlays three out-of-sample hindcast events (2004 Indian Ocean, 1960 Chile, 2018 Palu) on the Figure 1 marine network, where the red edges are the links these events contribute, while the set of hazard nodes stays unchanged. Click a node to light up its neighbours, click an edge to isolate it and its two endpoints, and click empty space to reset.",
-    tab1:"Fig. 1 · Marine network (39 nodes)", tab2:"Fig. 2 · Marine vs Mainland (15 classes)", tab3:"Fig. 3 · Three-event overlay",
+    desc:"An interactive reproduction of the network figures from the marine seismic hazard-chain study. Figure 1 is the fine-grained marine chain (39 nodes, 152 directed edges); Figure 2 compares the marine and inland earthquake chains after aggregating to 15 hazard classes; Figure 3 overlays three independent test events (2004 Indian Ocean, 1960 Chile, 2018 Palu) on the Figure 1 marine network, where the red edges are the links these events contribute, while the set of hazard nodes stays unchanged. Click a node to light up its neighbours, click an edge to isolate it and its two endpoints, and click empty space to reset.",
+    tab1:"Fig. 1 · Marine network (39 nodes)", tab2:"Fig. 2 · Marine vs Inland (15 classes)", tab3:"Fig. 3 · Three-event overlay",
     lblColor:"Colour:", optLayer:"By layer", optDegree:"By degree (yellow→red)",
-    cap2a:"Marine chain · 15 classes (57 edges)", cap2b:"Mainland China chain · 15 classes (47 edges)",
+    cap2a:"Marine chain · 15 classes (57 edges)", cap2b:"Inland earthquake chain · 14 classes (44 edges)",
     cap3:"Three independent events (2004 Indian Ocean / 1960 Chile / 2018 Palu) overlaid on the marine network. New-event nodes are coloured by layer; edges: dark red = the 14 novel links, black = new-event links already in the record, grey = original-only links. Click any node to light up its neighbours and dim the rest.",
     legSize:"Node size = total degree (in + out)",
     foot:"Data and taxonomy from the marine seismic hazard-chain manuscript (Shi, Hu & Zhang). Rendered with vis-network. Click a node to trace its couplings.",
@@ -335,7 +335,7 @@ document.getElementById('langBtn').onclick=()=>{lang=(lang==='zh')?'en':'zh';app
 /* ---------------- build ---------------- */
 buildNet('net1','fig1');
 buildNet('net2a','marine15');
-buildNet('net2b','mainland15');
+buildNet('net2b','inland15');
 buildNet('net3','overlay');
 applyLang();
 </script>

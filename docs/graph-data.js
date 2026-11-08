@@ -1280,7 +1280,7 @@ const GRAPHS = {
       }
     ]
   },
-  "mainland15": {
+  "inland15": {
     "nodes": [
       {
         "id": "Business Interr.",
@@ -1315,19 +1315,11 @@ const GRAPHS = {
         "out": 0
       },
       {
-        "id": "Disease",
-        "label": "DI",
-        "full": "Disease",
-        "layer": "Natural",
-        "in": 2,
-        "out": 0
-      },
-      {
         "id": "Econ. Crisis",
         "label": "EC",
         "full": "Econ. Crisis",
         "layer": "Consequence",
-        "in": 7,
+        "in": 6,
         "out": 0
       },
       {
@@ -1336,7 +1328,7 @@ const GRAPHS = {
         "full": "EQ or AS",
         "layer": "Trigger",
         "in": 0,
-        "out": 14
+        "out": 13
       },
       {
         "id": "Fire",
@@ -1376,7 +1368,7 @@ const GRAPHS = {
         "full": "Mass Slide",
         "layer": "Natural",
         "in": 1,
-        "out": 6
+        "out": 5
       },
       {
         "id": "Phy.-Psych. Trauma",
@@ -1400,7 +1392,7 @@ const GRAPHS = {
         "full": "Water Dil.",
         "layer": "Natural",
         "in": 3,
-        "out": 2
+        "out": 1
       }
     ],
     "edges": [
@@ -1494,10 +1486,6 @@ const GRAPHS = {
       },
       {
         "from": "EQ or AS",
-        "to": "Disease"
-      },
-      {
-        "from": "EQ or AS",
         "to": "Econ. Crisis"
       },
       {
@@ -1574,10 +1562,6 @@ const GRAPHS = {
       },
       {
         "from": "Mass Slide",
-        "to": "Econ. Crisis"
-      },
-      {
-        "from": "Mass Slide",
         "to": "Flood"
       },
       {
@@ -1587,10 +1571,6 @@ const GRAPHS = {
       {
         "from": "Water Dil.",
         "to": "Business Interr."
-      },
-      {
-        "from": "Water Dil.",
-        "to": "Disease"
       }
     ]
   },
