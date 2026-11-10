@@ -42,8 +42,8 @@ details summary { cursor: pointer; color: #2c3e50; font-weight: 600; }
 </style>
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21316691.svg){data-external="1"}](https://doi.org/10.5281/zenodo.21316691)
-&nbsp;[**GitHub repository**](https://github.com/hazardchain/NHESS-marine-seismic-hazard-chains-code-data)
-&nbsp;·&nbsp;[**Interactive network viewer**](https://hazardchain.github.io/NHESS-marine-seismic-hazard-chains-code-data/)
+&nbsp;[**GitHub repository**](https://github.com/hazardchain/marine-seismic-hazard-chains-code-data)
+&nbsp;·&nbsp;[**Interactive network viewer**](https://hazardchain.github.io/marine-seismic-hazard-chains-code-data/)
 
 > Code blocks are folded for readability — click **Code** next to any output to
 > see exactly how it is produced, or use the **Code ▾** menu (top right) to
@@ -59,16 +59,18 @@ from the raw cascade tables in `data/`. Knit it (RStudio → *Knit*, or
 | Output | Section |
 |--------|---------|
 | Marine network (39 nodes / 152 edges) | \@ref(marine-network) |
-| **Table 2** — node in/out degree | \@ref(table-2-node-degrees) |
-| **Table 3** — four-layer net flow | \@ref(table-3-four-layer-net-flow) |
-| **Table 4** — 15-class marine vs inland | \@ref(table-4-15-class-comparison) |
-| **Table 5 / Sect. 3.5** — directed-edge coverage of the three independent events, with chance baselines | \@ref(independent-event-validation) |
-| **Table 6 / Sect. 3.5** — conclusions before and after merging the independent events | \@ref(independent-event-validation) |
-| **Table 7 / Sect. 3.6** — node removal (cascade reach, Eq. 6, exhaustive search) | \@ref(node-removal) |
+| **Table 1** — core nodes, in/out degree | \@ref(table-1-node-degrees) |
+| **Table 2** — four-layer net flow | \@ref(table-2-four-layer-net-flow) |
+| **Table 3** — 15-class marine vs inland (with the Table 8 class mapping) | \@ref(table-3-15-class-comparison) |
+| **Methods, Data and encoding** — composition of the two records: event years, catalogue causes, the nine non-earthquake or erroneous catalogue events and what excluding them changes | \@ref(record-composition) |
+| **Table 4 / Results, Independent-event test** — directed-edge coverage of the three independent events, with chance baselines and the 14 novel couplings | \@ref(independent-event-validation) |
+| **Table 5 / Results, Independent-event test** — conclusions before and after merging the independent events | \@ref(independent-event-validation) |
+| **Table 6 / Results, Node removal** — node removal (cascade reach, Eq. 6, exhaustive search) | \@ref(node-removal) |
 | **Figure 1** — marine network, in/out degree | \@ref(figure-1) |
 | **Figure 2** — marine vs inland, 15 classes | \@ref(figure-2) |
-| **Figure 3 / Sect. 3.4** — robustness & sampling sufficiency | \@ref(figure-3-robustness) |
-| **Figure 4 / Sect. 3.5** — three independent events overlaid on the marine network | \@ref(independent-event-validation) |
+| **Figure 3 / Results, Robustness and sampling sufficiency** — robustness & sampling sufficiency | \@ref(figure-3-robustness) |
+| **Figure 4 / Results, Independent-event test** — three independent events overlaid on the marine network | \@ref(independent-event-validation) |
+| **Discussion** — two-step reach of the submarine earthquake, documentation depth of the marine events, equal-sample check of the marine–inland contrast | \@ref(discussion-checks) |
 
 **Paths are relative** (this file sits at the repository root) and use
 `file.path()`, which is correct on Windows, Linux and macOS alike — no per-OS
@@ -90,9 +92,12 @@ data_dir   <- "data"
 marine_f   <- file.path(data_dir, "marine", "tsunami_Dohmen_2025_EQ.docx")
 inland_f   <- file.path(data_dir, "mainland_china",
                         paste0("earthquake_table_China_4_", c("E", "N", "SW", "NW"), ".docx"))
-stopifnot(file.exists(marine_f), all(file.exists(inland_f)))
+## landslide cause and entry status of the 58 marine events, copied from the catalogue of
+## Dohmen et al. (2025; PANGAEA, doi:10.1594/PANGAEA.979839), see data/README.md
+catalogue_f <- file.path(data_dir, "marine", "marine_events_catalogue_status.csv")
+stopifnot(file.exists(marine_f), all(file.exists(inland_f)), file.exists(catalogue_f))
 
-## Inland comparison network (paper Sect. 2.1): an inland earthquake has its epicentre on
+## Inland comparison network (paper Methods, Data and encoding): an inland earthquake has its epicentre on
 ## land and a hazard chain that does not involve a tsunami. Ten events of the China tables
 ## (nine Taiwan events and the 1994 Taiwan Strait event) have offshore epicentres or
 ## near-coast cascades and are excluded, which leaves 84 events and 500 chains.
@@ -163,7 +168,7 @@ cat(sprintf("Marine fine network: %d nodes, %d directed edges (incl. 1 self-loop
             vcount(g_marine), ecount(g_marine)))
 ```
 
-# Table 2: node degrees {#table-2-node-degrees}
+# Table 1: node degrees {#table-1-node-degrees}
 
 In/out degree of every node on the **fine** network (self-loop retained, so the
 PP self-loop contributes +1 to both PP's in- and out-degree, giving PP = in 9 /
@@ -176,13 +181,13 @@ deg_tab <- data.frame(
   Out  = degree(g_marine, mode = "out"),
   Net  = degree(g_marine, mode = "out") - degree(g_marine, mode = "in"),
   row.names = NULL)
-## the paper's Table 2 lists nodes with in- or out-degree >= 7 (upper quartile)
+## the paper's Table 1 lists nodes with in- or out-degree >= 7 (upper quartile)
 core <- deg_tab[deg_tab$In >= 7 | deg_tab$Out >= 7, ]
 knitr::kable(core[order(-core$Out, -core$In), ], row.names = FALSE,
-             caption = "Table 2 — core nodes (in- or out-degree >= 7).")
+             caption = "Table 1 — core nodes (in- or out-degree >= 7).")
 ```
 
-# Table 3: four-layer net flow {#table-3-four-layer-net-flow}
+# Table 2: four-layer net flow {#table-2-four-layer-net-flow}
 
 Nodes are aggregated into the four cascade layers; **net flow = out − in** summed
 over each layer's members. Expected: **+42 / +1 / −16 / −27** (sums to 0).
@@ -213,14 +218,14 @@ t3 <- layer_flow(g_marine, layer_fine, L4)
 knitr::kable(rbind(t3, data.frame(Layer="Total", Nodes=sum(t3$Nodes),
              `Out-flow`=sum(t3$`Out-flow`), `In-flow`=sum(t3$`In-flow`),
              `Net flow`=sum(t3$`Net flow`), `Net %`=round(sum(t3$`Net %`),1), check.names=FALSE)),
-             row.names = FALSE, caption = "Table 3 — four-layer net flow (fine network).")
+             row.names = FALSE, caption = "Table 2 — four-layer net flow (fine network).")
 ```
 
-# Table 4: 15-class comparison {#table-4-15-class-comparison}
+# Table 3: 15-class comparison {#table-3-15-class-comparison}
 
 Both chains are reduced to the **same 15 classes** and **simplified (duplicate
 edges and self-loops removed)** before any metric is computed. The 39 → 15
-mapping (also given in the paper's appendix) is:
+mapping (the paper's Table 8, in the Methods) is:
 
 ```{r coarse-map}
 coarse_map <- c(
@@ -257,7 +262,7 @@ cat(sprintf("China tables: %d events, %d chains | inland network: %d events, %d 
             vcount(g_inland_c), ecount(g_inland_c), length(unique(ev_in[has_chain & is_excl]))))
 ```
 
-The full Table 4 — comparable topology metrics **and** the four-layer net flow,
+The full Table 3 — comparable topology metrics **and** the four-layer net flow,
 combined in one table (Marine vs Inland), exactly as in the paper. Disease
 does not occur in the inland record, so the inland network has 14 classes.
 **Out/in-degree centralisation uses the paper's Eq. (4)**,
@@ -276,7 +281,7 @@ layer15 <- c("EQ or AS"="Trigger",
   "Business Interr."="Consequence","Healthcare Deg."="Consequence","Econ. Crisis"="Consequence",
   "Phy.-Psych. Trauma"="Consequence","Culture Perils"="Consequence","Social Unrest"="Consequence")
 
-## every reported Table 4 value for one 15-class graph, as a labelled character column
+## every reported Table 3 value for one 15-class graph, as a labelled character column
 table4_col <- function(g) {
   nf <- layer_flow(g, layer15, L4)$`Net %`          # Trigger / Natural / Engineering / Consequence
   c(`Nodes / edges`             = sprintf("%d / %d", vcount(g), ecount(g)),
@@ -299,10 +304,100 @@ knitr::kable(data.frame(Metric = names(marine_col),
                         `Inland`              = unname(inland_col),
                         check.names = FALSE),
              row.names = FALSE,
-             caption = "Table 4 — 15-class comparison: topology metrics and four-layer net flow.")
+             caption = "Table 3 — 15-class comparison: topology metrics and four-layer net flow.")
 ```
 
-# Table 7 / Sect. 3.6: node removal {#node-removal}
+# Methods, Data and encoding: composition of the two records {#record-composition}
+
+**What it shows / why:** the numbers that the Data and encoding subsection of the Methods gives for the two records. For
+the marine record: the 58 source events, their time span and how they split over
+time, and how the catalogue of Dohmen et al. (2025) attributes the 57 events taken
+from it. Their landslide cause and entry status are copied from the catalogue
+(PANGAEA, doi:10.1594/PANGAEA.979839) into
+`data/marine/marine_events_catalogue_status.csv`. Nine events are attributed to a
+cause other than an earthquake or flagged as erroneous entries. The chunk lists them,
+counts their chains and checks that excluding them leaves the sources, hubs and layer
+ordering reported in the Results and the marine column of Table 3 unchanged. For the inland
+record: the span of the 84 inland events.
+
+```{r record-composition}
+## directed pairs of a set of encodings, parsed exactly as in build_graph()
+rc_pairs <- function(enc) {
+  out <- list()
+  for (s in enc) for (seg in strsplit(s, ";")[[1]]) {
+    pr <- trimws(strsplit(seg, ",")[[1]])
+    if (length(pr) >= 2 && all(nzchar(pr[1:2]))) out[[length(out) + 1]] <- pr[1:2] }
+  if (length(out)) do.call(rbind, out) else matrix(character(0), 0, 2)
+}
+
+## marine record: source event of every chain, and the year in the event ID
+xm      <- read_doc(marine_f)
+rc_ev   <- event_of(xm)
+rc_enc  <- encoding_of(xm)
+rc_has  <- !is.na(rc_enc) & nzchar(trimws(rc_enc))
+rc_evs  <- unique(rc_ev[rc_has])
+rc_year <- as.integer(sub(".*_(\\d{3,4})$", "\\1", rc_evs))
+stopifnot(length(rc_evs) == 58, sum(rc_has) == 366, !anyNA(rc_year))
+cat(sprintf("marine record: %d events, %d chains, AD %d-%d | before 1900: %d, 1900-1999: %d, since 2000: %d\n",
+            length(rc_evs), sum(rc_has), min(rc_year), max(rc_year),
+            sum(rc_year < 1900), sum(rc_year >= 1900 & rc_year <= 1999), sum(rc_year >= 2000)))
+
+## catalogue attribution (cause: EQ earthquake, U unknown, V volcanic activity,
+## A anthropogenic activity, PA paraglacial conditions, PR precipitation)
+cat_tab <- read.csv(catalogue_f, stringsAsFactors = FALSE, na.strings = "")
+stopifnot(setequal(cat_tab$event_id, rc_evs))
+in_cat  <- !is.na(cat_tab$landslide_cause)
+cause_n <- table(cat_tab$landslide_cause[in_cat])
+cat(sprintf("in the catalogue: %d events (not listed: %s) | cause: %s | erroneous entries: %d\n",
+            sum(in_cat), paste(cat_tab$event_id[!in_cat], collapse = ", "),
+            paste(names(cause_n), cause_n, collapse = ", "),
+            sum(grepl("erroneous", cat_tab$catalogue_status))))
+
+## the nine events: a cause other than an earthquake, or an erroneous entry
+noneq_events <- cat_tab$event_id[in_cat & (cat_tab$landslide_cause != "EQ" |
+                                            grepl("erroneous", cat_tab$catalogue_status))]
+## build_graph(exclude =) matches IDs by prefix, so make sure it hits exactly these events
+stopifnot(sum(vapply(rc_evs, function(e) any(startsWith(e, noneq_events)), logical(1))) == length(noneq_events))
+nine_tab <- cat_tab[cat_tab$event_id %in% noneq_events, c("event_id", "landslide_cause", "catalogue_status")]
+nine_tab$chains <- vapply(nine_tab$event_id, function(e) sum(rc_has & rc_ev == e), integer(1))
+knitr::kable(nine_tab, row.names = FALSE, col.names = c("Event", "Cause", "Catalogue status", "Chains"),
+             caption = sprintf("The %d catalogue events attributed to a cause other than an earthquake or flagged as erroneous (%d of the %d chains).",
+                               nrow(nine_tab), sum(nine_tab$chains), sum(rc_has)))
+
+## what excluding them changes
+g_rc <- build_graph(marine_f, exclude = noneq_events)
+ekey <- function(g) with(igraph::as_data_frame(g), paste(from, to, sep = "->"))
+cat(sprintf("couplings documented only by these events: %s | network without them: %d nodes, %d edges\n",
+            paste(setdiff(ekey(g_marine), ekey(g_rc)), collapse = ", "), vcount(g_rc), ecount(g_rc)))
+rc_summary <- function(g) {
+  din <- degree(g, mode = "in"); dout <- degree(g, mode = "out")
+  nf  <- layer_flow(g, layer_fine, L4)$`Net flow`
+  c(`Pure sources`                     = paste(sort(names(din)[din == 0]), collapse = ", "),
+    `Top out-degree / top in-degree`   = sprintf("%s (%d) / %s (%d)", names(which.max(dout)), max(dout),
+                                                 names(which.max(din)), max(din)),
+    `NF in / out`                      = sprintf("%d / %d", din[["NF"]], dout[["NF"]]),
+    `Layer net flow T/N/E/C`           = paste(sprintf("%+d", nf), collapse = " / "),
+    `Net flow decreases down the layers` = as.character(all(diff(nf) < 0)))
+}
+grp_rc <- factor(coarse_map[V(g_rc)$name])
+g_rc_c <- contract(g_rc, as.integer(grp_rc), vertex.attr.comb = "first")
+V(g_rc_c)$name <- levels(grp_rc)
+g_rc_c <- simplify(g_rc_c, remove.multiple = TRUE, remove.loops = TRUE)
+rc_cmp <- data.frame(Quantity           = c(names(rc_summary(g_marine)), paste("Table 3:", names(marine_col))),
+                     `All 58 events`    = c(rc_summary(g_marine), marine_col),
+                     `Without the nine` = c(rc_summary(g_rc), table4_col(g_rc_c)), check.names = FALSE)
+rc_cmp$Unchanged <- rc_cmp[[2]] == rc_cmp[[3]]
+knitr::kable(rc_cmp, row.names = FALSE,
+             caption = "Sources, hubs and layer ordering of the fine network, and the marine column of Table 3, with and without the nine events.")
+
+## inland record: the span of the 84 inland events (year = first four digits in the event ID)
+rc_in_evs  <- unique(ev_in[has_chain & !is_excl])
+rc_in_year <- as.integer(regmatches(rc_in_evs, regexpr("[0-9]{4}", rc_in_evs)))
+stopifnot(length(rc_in_evs) == 84, length(rc_in_year) == 84)
+cat(sprintf("inland record: %d events, %d-%d\n", length(rc_in_evs), min(rc_in_year), max(rc_in_year)))
+```
+
+# Table 6 / Results, Node removal {#node-removal}
 
 **What it shows / how it is made:** the cascade reach $R(G)$ is the number of
 ordered hazard pairs $(i, j)$, $i \neq j$, joined by a directed path (the PP
@@ -314,8 +409,8 @@ $\Delta R(S) = \bigl(R_{V\setminus S}(G) - R(G-S)\bigr) / R_{V\setminus S}(G)$,
 the share of the remaining connectivity that depends on paths through $S$. The
 best sets of one, two and three nodes are found by **exhaustive search** over the
 nine engineering nodes (main result) and, for reference, over all 27
-process-layer nodes. This reproduces Table 7 and the 619 / 576 / 409 pair counts
-of Sect. 3.6.
+process-layer nodes. This reproduces Table 6 and the 619 / 576 / 409 pair counts
+of the Node removal subsection.
 
 ```{r node-removal}
 gr <- simplify(g_marine, remove.loops = TRUE, remove.multiple = TRUE)  # reachability ignores the self-loop
@@ -350,14 +445,14 @@ cat(sprintf("R(G) = %d ordered pairs | removing CF: %d -> %d pairs among the rem
 single <- data.frame(Node = eng, r = vapply(eng, function(v) removal(v)[["dR"]], numeric(1)))
 single <- single[order(-single$r), ]
 knitr::kable(data.frame(Node = single$Node, Reduction = sprintf("%.1f%%", single$r)), row.names = FALSE,
-             caption = "Table 7 (engineering candidates) — single nodes.")
+             caption = "Table 6 (engineering candidates) — single nodes.")
 knitr::kable(rbind(best_sets(eng, 2), best_sets(eng, 3)), row.names = FALSE,
-             caption = "Table 7 (engineering candidates) — best and next-best pairs and triples (exhaustive search over 9 nodes).")
+             caption = "Table 6 (engineering candidates) — best and next-best pairs and triples (exhaustive search over 9 nodes).")
 nat <- names(layer_fine)[layer_fine == "Natural"]
 nat_r <- vapply(nat, function(v) removal(v)[["dR"]], numeric(1))
 cat(sprintf("best natural-process node: %s (%.1f%%)\n", names(which.max(nat_r)), max(nat_r)))
 knitr::kable(rbind(best_sets(proc, 1), best_sets(proc, 2), best_sets(proc, 3)), row.names = FALSE,
-             caption = "Table 7 (process-layer candidates, reference) — best and next-best sets (exhaustive search over 27 nodes).")
+             caption = "Table 6 (process-layer candidates, reference) — best and next-best sets (exhaustive search over 27 nodes).")
 cat(sprintf("CF + FI + TS (fire in place of critical network failure): %.1f%%\n", removal(c("CF", "FI", "TS"))[["dR"]]))
 ```
 
@@ -411,7 +506,7 @@ classes) networks on **one shared force-directed layout** so each class sits in
 the same place across panels. Four panels: marine in/out degree, inland in/out
 degree; colour and size encode degree. The layout is computed, as in v1.0.1, on
 the marine network together with the complete China tables (all 94 events), so
-that every class keeps the position it has in the discussion-paper figure; the
+that every class keeps the position it has in the earlier version of the figure; the
 inland panels themselves draw only the 84 inland events. This is the code behind
 `fig02_300dpi.png`.
 
@@ -444,7 +539,7 @@ draw_fig2 <- function() {
 export_fig(draw_fig2, "fig02", 12, 11)
 ```
 
-# Figure 3 / Sect. 3.4: robustness & sampling sufficiency {#figure-3-robustness}
+# Figure 3 / Results, Robustness and sampling sufficiency {#figure-3-robustness}
 
 **What it shows / how it is made:** the 366 chains cluster under **58 source
 events (tsunamis)**, so all resampling is at the **event level** (cluster
@@ -453,9 +548,9 @@ panel (b) is the fraction of `B=1000` event-bootstrap resamples in which each
 qualitative conclusion holds (C1 pure sources; C2 dominant hubs SEQ/CF; C3
 NF-as-convergence; C4 monotone four-layer cascade). The same `B` resamples
 also yield the 95% bootstrap intervals for the two hub degrees quoted in
-Sect. 3.4 (submarine-earthquake out-degree and critical-infrastructure-failure
+the Robustness subsection (submarine-earthquake out-degree and critical-infrastructure-failure
 in-degree); these are printed below the figure rather than plotted. The first
-check of Sect. 3.4 --- raising the edge-inclusion threshold to `>=1`, `>=2` and
+check of the Robustness subsection --- raising the edge-inclusion threshold to `>=1`, `>=2` and
 `>=3` independent events, which progressively removes low-frequency links --- is
 also tabulated below the figure, showing which of C1--C4 survive at each
 threshold (only C3 fails, at the `>=3` core of 46 edges).
@@ -487,7 +582,7 @@ concl <- function(g) { dout <- degree(g, mode="out"); din <- degree(g, mode="in"
     C4 = (nf["Trigger"]>nf["Natural"] && nf["Natural"]>nf["Engineering"] &&
           nf["Engineering"]>nf["Consequence"] && nf["Trigger"]>0 && nf["Consequence"]<0)) }
 
-## First check (Sect. 3.4): raise the inclusion threshold to >= 1, 2, 3
+## First check (Results, Robustness and sampling sufficiency): raise the inclusion threshold to >= 1, 2, 3
 ## independent events. Raising it strips low-frequency (single-event) links;
 ## C1-C4 are re-tested on each thresholded network to see which conclusions
 ## survive. (efreq counts, for every directed edge, the number of source
@@ -502,7 +597,7 @@ B <- 1000
 stab <- rowMeans(sapply(1:B, function(b)
   concl(build_e(unique(unlist(ev_edges[sample(n_ev, n_ev, replace = TRUE)])))))) * 100
 
-## 95% bootstrap intervals for the two hub degrees quoted in Sect. 3.4
+## 95% bootstrap intervals for the two hub degrees quoted in the Robustness subsection
 ## (event-level cluster bootstrap; reported in the text, not plotted in Fig. 3)
 deg_boot <- sapply(1:B, function(b) {
   g  <- build_e(unique(unlist(ev_edges[sample(n_ev, n_ev, replace = TRUE)])))
@@ -514,7 +609,7 @@ deg_ci <- function(x) sprintf("%.1f (95%% CI [%d, %d])", mean(x),
 fr  <- seq(.05, 1, .05)
 acc <- sapply(fr, function(f) { k <- max(1, round(f*n_ev))
   mean(sapply(1:200, function(s) length(unique(unlist(ev_edges[sample(n_ev, k)]))))) })
-## Out-of-sample edge coverage (Sect. 3.4), for ALL held-out links and for the
+## Out-of-sample edge coverage (Results, Robustness and sampling sufficiency), for ALL held-out links and for the
 ## core links, averaged over many random 5-fold splits. A single split is noisy
 ## (and R's sample() RNG changed at R 3.6), so we average to get a stable,
 ## seed-robust value: all links ~74%, core ~96%. The core links are those
@@ -546,9 +641,9 @@ draw_fig3 <- function() {
 export_fig(draw_fig3, "fig03", 10, 4.2)
 cat(sprintf("events=%d | C1..C4 hold in %s%% | out-of-sample coverage: all links %.0f%%, >=2 core %.0f%%\n",
             n_ev, paste(round(stab), collapse="/"), all_cov, core_cov))
-cat(sprintf("hub-degree bootstrap (Sect. 3.4): SEQ out-degree %s ; CF in-degree %s\n",
+cat(sprintf("hub-degree bootstrap (Results, Robustness): SEQ out-degree %s ; CF in-degree %s\n",
             deg_ci(deg_boot["SEQ_out", ]), deg_ci(deg_boot["CF_in", ])))
-cat("First check (Sect. 3.4) -- which conclusions survive as low-frequency links are removed:\n")
+cat("First check (Results, Robustness) -- which conclusions survive as low-frequency links are removed:\n")
 print(thr_check, row.names = FALSE)
 ```
 
@@ -681,7 +776,14 @@ knitr::kable(covA, row.names = FALSE,
              caption = sprintf("(A) Directed-edge coverage of the three independent events by the paper's network (%d novel enrichment links).",
                                sum(!all_ek %in% orig_keys)))
 
-## (A2) chance baselines for the coverage (Sect. 3.5): a random network with the same
+## the novel couplings, and how many of them involve one of the hubs SEQ, TS, CF or NF
+novel_ek <- all_ek[!all_ek %in% orig_keys]
+hub_hit  <- vapply(strsplit(novel_ek, " "), function(p) any(p %in% c("SEQ", "TS", "CF", "NF")), logical(1))
+cat(sprintf("%d novel couplings: %s\n%d of them involve a hub (SEQ, TS, CF or NF): %s\n",
+            length(novel_ek), paste(sub(" ", "->", novel_ek), collapse = ", "),
+            sum(hub_hit), paste(sub(" ", "->", novel_ek[hub_hit]), collapse = ", ")))
+
+## (A2) chance baselines for the coverage (Results, Independent-event test): a random network with the same
 ## nodes and edges, and random rewirings that keep the in- and out-degree of every node
 ## (edge swaps a->b, c->d  =>  a->d, c->b; Maslov and Sneppen, 2002)
 g_s <- simplify(g_marine, remove.loops = TRUE, remove.multiple = TRUE)
@@ -739,11 +841,69 @@ knitr::kable(data.frame(Metric = c("Out-degree ranking", "In-degree ranking"),
   row.names = FALSE, caption = "(C) Node-importance rank stability under the new data.")
 ```
 
+# Discussion: supporting numbers {#discussion-checks}
+
+**What it shows / why:** three further numbers quoted in the Discussion. (1) How far
+the submarine earthquake reaches: the hazards it triggers directly and those it reaches
+within two steps. (2) Documentation depth: the marine events that document no
+consequence-layer hazard, and those whose chains stop at the natural-process layer.
+(3) An equal-sample check of the marine–inland contrast: 1000 random draws of 58 of
+the 84 inland events, each rebuilt as a 15-class network and compared with the marine
+network on density, out- and in-degree centralisation and consequence-layer net flow.
+
+```{r discussion-checks}
+## (1) reach of the submarine earthquake in the fine network
+dc_d <- distances(g_marine, v = "SEQ", mode = "out")[1, ]
+dc_d <- dc_d[names(dc_d) != "SEQ"]
+cat(sprintf("SEQ triggers %d of the other %d hazards directly and reaches %d within two steps\n",
+            sum(dc_d == 1), length(dc_d), sum(dc_d <= 2)))
+
+## (2) documentation depth: the layers that the chains of each marine event reach
+dc_layers <- lapply(rc_evs, function(e) unique(layer_fine[c(rc_pairs(rc_enc[rc_has & rc_ev == e]))]))
+stopifnot(!anyNA(unlist(dc_layers)))
+dc_nocons <- !vapply(dc_layers, function(l) "Consequence" %in% l, logical(1))
+dc_natend <- !vapply(dc_layers, function(l) any(c("Engineering", "Consequence") %in% l), logical(1))
+cat(sprintf("marine events with no consequence-layer hazard: %d of %d; of these, stopping at the natural-process layer: %d\n",
+            sum(dc_nocons), length(rc_evs), sum(dc_natend)))
+
+## (3) equal-sample check: 1000 draws of 58 of the 84 inland events. Each event's
+## couplings are parsed once; a draw is the union of its events' couplings, simplified
+## (duplicate edges and self-loops removed) exactly as for Table 3.
+dc_in_enc <- encoding_of(xin)
+dc_in_key <- lapply(rc_in_evs, function(e) {
+  p <- rc_pairs(dc_in_enc[has_chain & ev_in == e]); unique(paste(p[, 1], p[, 2], sep = "|")) })
+dc_inland <- function(idx) {
+  k <- do.call(rbind, strsplit(unique(unlist(dc_in_key[idx])), "|", fixed = TRUE))
+  simplify(graph_from_data_frame(data.frame(from = k[, 1], to = k[, 2]), directed = TRUE),
+           remove.multiple = TRUE, remove.loops = TRUE)
+}
+stopifnot(setequal(ekey(dc_inland(seq_along(rc_in_evs))), ekey(g_inland_c)))   # all 84 = the Table 3 network
+dc_metrics <- function(g) c(edge_density(g, loops = FALSE), Cfree(g, "out"), Cfree(g, "in"),
+                            layer_flow(g, layer15, L4)$`Net %`[4])
+dc_marine <- dc_metrics(g_marine_c)
+dc_inl84  <- dc_metrics(g_inland_c)
+set.seed(1)
+dc_draws  <- t(replicate(1000, dc_metrics(dc_inland(sample(length(rc_in_evs), 58)))))
+dc_fmt    <- c("%.3f", "%.3f", "%.3f", "%+.1f%%")
+dc_dir    <- c(-1, 1, 1, -1)   # inland: lower density, higher centralisation, more negative consequence flow
+dc_share  <- vapply(1:4, function(j) 100 * mean(dc_dir[j] * (dc_draws[, j] - dc_marine[j]) > 0), numeric(1))
+knitr::kable(data.frame(
+  Metric = c("Network density (inland lower)", "Out-degree centralisation (inland higher)",
+             "In-degree centralisation (inland higher)", "Net flow — Consequence (inland more negative)"),
+  Marine                         = vapply(1:4, function(j) sprintf(dc_fmt[j], dc_marine[j]), ""),
+  `Inland, 84 events`            = vapply(1:4, function(j) sprintf(dc_fmt[j], dc_inl84[j]), ""),
+  `Inland, 58-event draws (range)` = vapply(1:4, function(j)
+                                     paste(sprintf(dc_fmt[j], range(dc_draws[, j])), collapse = " to "), ""),
+  `Draws in that direction`      = sprintf("%.0f%%", dc_share), check.names = FALSE),
+  row.names = FALSE,
+  caption = "Equal-sample check of the marine–inland contrast: 1000 random draws of 58 of the 84 inland events.")
+```
+
 # Interactive viewer data {#viewer-data}
 
 **What it makes / why:** the interactive network viewer linked from the figure
 captions (`docs/index.html`, served at
-<https://hazardchain.github.io/NHESS-marine-seismic-hazard-chains-code-data/>) is driven
+<https://hazardchain.github.io/marine-seismic-hazard-chains-code-data/>) is driven
 by `docs/graph-data.js`. This chunk regenerates that file **from the very same
 graph objects** used for the tables and figures above (`g_marine`,
 `g_marine_c`, `g_inland_c`), so the web page, the paper figures, and the
@@ -827,7 +987,7 @@ if (!requireNamespace("jsonlite", quietly = TRUE)) {
 ```
 
 The web viewer therefore shares its single source of truth with Figs 1–2 and
-Tables 2–4: re-knit this document and the interactive page updates automatically.
+Tables 1–3: re-knit this document and the interactive page updates automatically.
 
 # Session information
 
