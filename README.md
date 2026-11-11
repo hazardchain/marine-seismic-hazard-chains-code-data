@@ -18,11 +18,11 @@ paper directly from the raw cascade tables in [`data/`](data/). Knit it
 
 - Marine network — **39 nodes / 152 edges**
 - **Methods, Data and encoding** composition of the two records — event years, catalogue causes, the nine non-earthquake or erroneous catalogue events and a check that excluding them changes no marine conclusion
-- **Table 1** node degrees · **Table 2** four-layer net flow (+42/+1/−16/−27) · **Table 3** 15-class marine (15 classes / 57 edges) vs inland (14 / 44), with the **Table 8** class mapping
+- **Table 1** node degrees and hubs · **Table 2** four-layer net flow (+42/+1/−16/−27) · **Table 3** 15-class marine (15 classes / 57 edges) vs inland (14 / 44), with the **Table 8** class mapping
 - **Figure 1** marine in/out-degree network · **Figure 2** marine vs inland (15 classes)
-- **Robustness and sampling sufficiency / Figure 3** — — event-level cluster bootstrap, inclusion thresholds and five-fold out-of-sample edge coverage
-- **Independent-event test / Figure 4, Tables 4–5** — — three events (2004 Indian Ocean, 1960 Valdivia, 2018 Palu) overlaid on the network, with chance baselines for the coverage
-- **Node removal / Table 6** — — cascade reach (Eq. 6) and exhaustive search for the best sets of one to three nodes
+- **Robustness and sampling sufficiency / Figure 3** — event-level cluster bootstrap, inclusion thresholds and five-fold out-of-sample edge coverage
+- **Independent-event test / Figure 4, Tables 4–5** — three events (2004 Indian Ocean, 1960 Valdivia, 2018 Palu) overlaid on the network, with chance baselines for the coverage
+- **Node removal / Table 6** — cascade reach (Eq. 6) and exhaustive search for the best sets of one to three nodes
 - **Discussion** — two-step reach of the submarine earthquake, documentation depth of the marine events, and an equal-sample check of the marine–inland contrast (1000 draws of 58 of the 84 inland events)
 - **`docs/graph-data.js`** — the interactive viewer's data, written from the *same* graph objects, so the web page never drifts from the figures
 
@@ -69,6 +69,22 @@ this repository are archived on Zenodo:
 [doi:10.5281/zenodo.21316691](https://doi.org/10.5281/zenodo.21316691) (all
 versions; resolves to the latest release).
 
+## Changes in v1.2.1
+
+- **Wording follows the corrected manuscript.** The paper now uses "hub" in one
+  sense only (Table 1 footnote: in- and out-degree both >= 5 and within a factor
+  of two; TS, CFL, CF and FI are hubs, TS and CF the main hubs). The code
+  computes this definition (`hub_role()`), adds it to Table 1, and shows that the
+  hubs are unchanged when the nine non-earthquake or erroneous events are
+  excluded and when the three independent events are added. C2 now reads
+  "highest out-degree SEQ, highest in-degree CF"; the novel couplings are counted
+  against the core nodes SEQ, TS, CF and NF; the three independent events are
+  "earthquake-generated" tsunamis (Palu 2018 is encoded as a coastal earthquake).
+- **Reproduction document.** The subtitle carries the current title, and the
+  section links of the overview table work (they printed as `@ref(...)` text).
+- **Viewer.** The three-event overlay is labelled Figure 4, as in the paper.
+- No number, table, figure file or `docs/graph-data.js` changed.
+
 ## Changes in v1.2.0 (manuscript for npj Natural Hazards)
 
 - **Target journal and repository name.** The manuscript is now prepared for
@@ -80,7 +96,7 @@ versions; resolves to the latest release).
   the Methods data description (event years; catalogue causes; the nine non-earthquake or erroneous
   catalogue events, their 14 chains and the check that excluding them leaves the
   sources, hubs, layer ordering and the marine column of Table 3 unchanged), for
-  the independent-event test (the 14 novel couplings, two of which involve a hub) and for the
+  the independent-event test (the 14 novel couplings, two of which involve a core node) and for the
   Discussion (two-step reach of SEQ; events without consequence-layer hazards;
   equal-sample check of the inland network). All earlier outputs are unchanged.
 - **New data file** `data/marine/marine_events_catalogue_status.csv` (catalogue

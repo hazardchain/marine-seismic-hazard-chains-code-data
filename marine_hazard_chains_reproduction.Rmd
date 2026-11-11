@@ -1,6 +1,6 @@
 ---
 title: "Reproducing the marine seismic hazard-chain results"
-subtitle: "Network Topology of Marine Seismic Hazard Chains — one document that regenerates every table and figure"
+subtitle: "Network topology of marine seismic hazard chains and contrasts with inland earthquake chains — one document that regenerates every table and figure"
 author: "Shi, Hu, Zhang"
 date: "`r format(Sys.Date())`"
 output:
@@ -58,19 +58,19 @@ from the raw cascade tables in `data/`. Knit it (RStudio → *Knit*, or
 
 | Output | Section |
 |--------|---------|
-| Marine network (39 nodes / 152 edges) | \@ref(marine-network) |
-| **Table 1** — core nodes, in/out degree | \@ref(table-1-node-degrees) |
-| **Table 2** — four-layer net flow | \@ref(table-2-four-layer-net-flow) |
-| **Table 3** — 15-class marine vs inland (with the Table 8 class mapping) | \@ref(table-3-15-class-comparison) |
-| **Methods, Data and encoding** — composition of the two records: event years, catalogue causes, the nine non-earthquake or erroneous catalogue events and what excluding them changes | \@ref(record-composition) |
-| **Table 4 / Results, Independent-event test** — directed-edge coverage of the three independent events, with chance baselines and the 14 novel couplings | \@ref(independent-event-validation) |
-| **Table 5 / Results, Independent-event test** — conclusions before and after merging the independent events | \@ref(independent-event-validation) |
-| **Table 6 / Results, Node removal** — node removal (cascade reach, Eq. 6, exhaustive search) | \@ref(node-removal) |
-| **Figure 1** — marine network, in/out degree | \@ref(figure-1) |
-| **Figure 2** — marine vs inland, 15 classes | \@ref(figure-2) |
-| **Figure 3 / Results, Robustness and sampling sufficiency** — robustness & sampling sufficiency | \@ref(figure-3-robustness) |
-| **Figure 4 / Results, Independent-event test** — three independent events overlaid on the marine network | \@ref(independent-event-validation) |
-| **Discussion** — two-step reach of the submarine earthquake, documentation depth of the marine events, equal-sample check of the marine–inland contrast | \@ref(discussion-checks) |
+| Marine network (39 nodes / 152 edges) | [go to section](#marine-network) |
+| **Table 1** — high-degree nodes, in/out degree and hubs | [go to section](#table-1-node-degrees) |
+| **Table 2** — four-layer net flow | [go to section](#table-2-four-layer-net-flow) |
+| **Table 3** — 15-class marine vs inland (with the Table 8 class mapping) | [go to section](#table-3-15-class-comparison) |
+| **Methods, Data and encoding** — composition of the two records: event years, catalogue causes, the nine non-earthquake or erroneous catalogue events and what excluding them changes | [go to section](#record-composition) |
+| **Table 4 / Results, Independent-event test** — directed-edge coverage of the three independent events, with chance baselines and the 14 novel couplings | [go to section](#independent-event-validation) |
+| **Table 5 / Results, Independent-event test** — conclusions before and after merging the independent events | [go to section](#independent-event-validation) |
+| **Table 6 / Results, Node removal** — node removal (cascade reach, Eq. 6, exhaustive search) | [go to section](#node-removal) |
+| **Figure 1** — marine network, in/out degree | [go to section](#figure-1) |
+| **Figure 2** — marine vs inland, 15 classes | [go to section](#figure-2) |
+| **Figure 3 / Results, Robustness and sampling sufficiency** — robustness & sampling sufficiency | [go to section](#figure-3-robustness) |
+| **Figure 4 / Results, Independent-event test** — three independent events overlaid on the marine network | [go to section](#independent-event-validation) |
+| **Discussion** — two-step reach of the submarine earthquake, documentation depth of the marine events, equal-sample check of the marine–inland contrast | [go to section](#discussion-checks) |
 
 **Paths are relative** (this file sits at the repository root) and use
 `file.path()`, which is correct on Windows, Linux and macOS alike — no per-OS
@@ -181,10 +181,29 @@ deg_tab <- data.frame(
   Out  = degree(g_marine, mode = "out"),
   Net  = degree(g_marine, mode = "out") - degree(g_marine, mode = "in"),
   row.names = NULL)
-## the paper's Table 1 lists nodes with in- or out-degree >= 7 (upper quartile)
+## the paper's Table 1 lists the high-degree nodes: in- or out-degree >= 7, i.e. the larger
+## of the two lies in the upper quartile of the 39 nodes
+## hub (paper, Table 1 footnote; the only sense in which the paper uses the term): a
+## high-degree node whose in- and out-degree are both >= 5 (the upper quartile of each) and
+## within a factor of two of each other; the two hubs with the highest total degree are the
+## main hubs
+hub_role <- function(g) {
+  di <- degree(g, mode = "in"); do <- degree(g, mode = "out")
+  hub <- pmax(di, do) >= 7 & di >= 5 & do >= 5 & do <= 2 * di & di <= 2 * do
+  role <- setNames(ifelse(hub, "hub", ""), names(di))
+  role[names(sort((di + do)[hub], decreasing = TRUE))[1:2]] <- "main hub"
+  role
+}
+hubs_of <- function(g) { r <- hub_role(g)
+  sprintf("%s (main: %s)", paste(sort(names(r)[r != ""]), collapse = ", "),
+          paste(sort(names(r)[r == "main hub"]), collapse = ", ")) }
+q75 <- function(m) quantile(degree(g_marine, mode = m), .75)
+cat(sprintf("upper quartile: in-degree %g, out-degree %g, larger of the two %g\n", q75("in"), q75("out"),
+            quantile(pmax(degree(g_marine, mode = "in"), degree(g_marine, mode = "out")), .75)))
 core <- deg_tab[deg_tab$In >= 7 | deg_tab$Out >= 7, ]
+core$Hub <- hub_role(g_marine)[core$Code]
 knitr::kable(core[order(-core$Out, -core$In), ], row.names = FALSE,
-             caption = "Table 1 — core nodes (in- or out-degree >= 7).")
+             caption = "Table 1 — high-degree nodes (in- or out-degree >= 7) and hubs.")
 ```
 
 # Table 2: four-layer net flow {#table-2-four-layer-net-flow}
@@ -375,6 +394,7 @@ rc_summary <- function(g) {
   c(`Pure sources`                     = paste(sort(names(din)[din == 0]), collapse = ", "),
     `Top out-degree / top in-degree`   = sprintf("%s (%d) / %s (%d)", names(which.max(dout)), max(dout),
                                                  names(which.max(din)), max(din)),
+    `Hubs`                             = hubs_of(g),
     `NF in / out`                      = sprintf("%d / %d", din[["NF"]], dout[["NF"]]),
     `Layer net flow T/N/E/C`           = paste(sprintf("%+d", nf), collapse = " / "),
     `Net flow decreases down the layers` = as.character(all(diff(nf) < 0)))
@@ -545,9 +565,9 @@ export_fig(draw_fig2, "fig02", 12, 11)
 events (tsunamis)**, so all resampling is at the **event level** (cluster
 bootstrap). Panel (a) is the edge-accumulation (sampling-sufficiency) curve;
 panel (b) is the fraction of `B=1000` event-bootstrap resamples in which each
-qualitative conclusion holds (C1 pure sources; C2 dominant hubs SEQ/CF; C3
+qualitative conclusion holds (C1 pure sources; C2 highest out-degree SEQ, highest in-degree CF; C3
 NF-as-convergence; C4 monotone four-layer cascade). The same `B` resamples
-also yield the 95% bootstrap intervals for the two hub degrees quoted in
+also yield the 95% bootstrap intervals for the two degrees quoted in
 the Robustness subsection (submarine-earthquake out-degree and critical-infrastructure-failure
 in-degree); these are printed below the figure rather than plotted. The first
 check of the Robustness subsection --- raising the edge-inclusion threshold to `>=1`, `>=2` and
@@ -597,7 +617,7 @@ B <- 1000
 stab <- rowMeans(sapply(1:B, function(b)
   concl(build_e(unique(unlist(ev_edges[sample(n_ev, n_ev, replace = TRUE)])))))) * 100
 
-## 95% bootstrap intervals for the two hub degrees quoted in the Robustness subsection
+## 95% bootstrap intervals for the two degrees quoted in the Robustness subsection
 ## (event-level cluster bootstrap; reported in the text, not plotted in Fig. 3)
 deg_boot <- sapply(1:B, function(b) {
   g  <- build_e(unique(unlist(ev_edges[sample(n_ev, n_ev, replace = TRUE)])))
@@ -641,7 +661,7 @@ draw_fig3 <- function() {
 export_fig(draw_fig3, "fig03", 10, 4.2)
 cat(sprintf("events=%d | C1..C4 hold in %s%% | out-of-sample coverage: all links %.0f%%, >=2 core %.0f%%\n",
             n_ev, paste(round(stab), collapse="/"), all_cov, core_cov))
-cat(sprintf("hub-degree bootstrap (Results, Robustness): SEQ out-degree %s ; CF in-degree %s\n",
+cat(sprintf("degree bootstrap (Results, Robustness): SEQ out-degree %s ; CF in-degree %s\n",
             deg_ci(deg_boot["SEQ_out", ]), deg_ci(deg_boot["CF_in", ])))
 cat("First check (Results, Robustness) -- which conclusions survive as low-frequency links are removed:\n")
 print(thr_check, row.names = FALSE)
@@ -649,7 +669,7 @@ print(thr_check, row.names = FALSE)
 
 # Independent-event validation {#independent-event-validation}
 
-**What it shows / why:** three major submarine-earthquake tsunamis that are **not among
+**What it shows / why:** three major earthquake-generated tsunamis that are **not among
 the 58 compiled events** — the 2004 Indian Ocean (Sumatra-Andaman), the 1960
 Valdivia (Chile) and the 2018 Palu (Sulawesi) events — are encoded as documented,
 individually sourced cascade chains in
@@ -776,12 +796,13 @@ knitr::kable(covA, row.names = FALSE,
              caption = sprintf("(A) Directed-edge coverage of the three independent events by the paper's network (%d novel enrichment links).",
                                sum(!all_ek %in% orig_keys)))
 
-## the novel couplings, and how many of them involve one of the hubs SEQ, TS, CF or NF
+## the novel couplings, and how many of them involve a core node: the dominant source SEQ,
+## the main hubs TS and CF, or the convergence node NF
 novel_ek <- all_ek[!all_ek %in% orig_keys]
-hub_hit  <- vapply(strsplit(novel_ek, " "), function(p) any(p %in% c("SEQ", "TS", "CF", "NF")), logical(1))
-cat(sprintf("%d novel couplings: %s\n%d of them involve a hub (SEQ, TS, CF or NF): %s\n",
+core_hit <- vapply(strsplit(novel_ek, " "), function(p) any(p %in% c("SEQ", "TS", "CF", "NF")), logical(1))
+cat(sprintf("%d novel couplings: %s\n%d of them involve a core node (SEQ, TS, CF or NF): %s\n",
             length(novel_ek), paste(sub(" ", "->", novel_ek), collapse = ", "),
-            sum(hub_hit), paste(sub(" ", "->", novel_ek[hub_hit]), collapse = ", ")))
+            sum(core_hit), paste(sub(" ", "->", novel_ek[core_hit]), collapse = ", ")))
 
 ## (A2) chance baselines for the coverage (Results, Independent-event test): a random network with the same
 ## nodes and edges, and random rewirings that keep the in- and out-degree of every node
@@ -810,7 +831,7 @@ check <- function(g) {
   g <- simplify(g, remove.multiple = TRUE, remove.loops = TRUE)
   nm <- V(g)$name; ind <- degree(g, mode = "in"); outd <- degree(g, mode = "out"); lv <- layer_fine[nm]
   net <- sapply(L4, function(k) sum(outd[lv == k]) - sum(ind[lv == k]))
-  list(N = vcount(g), E = E_all, src = sort(nm[ind == 0]),
+  list(N = vcount(g), E = E_all, src = sort(nm[ind == 0]), hubs = hubs_of(g),
        to = nm[which.max(outd)], tov = max(outd), ti = nm[which.max(ind)], tiv = max(ind),
        nfi = ind[nm == "NF"], nfo = outd[nm == "NF"], net = net,
        C1 = setequal(nm[ind == 0], c("SEQ", "EQ")),
@@ -822,15 +843,15 @@ check <- function(g) {
 g_aug <- graph_from_data_frame(unique(rbind(E_orig, E_extra)), directed = TRUE)
 b0 <- check(g_marine); b1 <- check(g_aug)
 fmt <- function(b) c(sprintf("%d / %d", b$N, b$E), paste(b$src, collapse = ", "),
-  sprintf("%s (%d)", b$to, b$tov), sprintf("%s (%d)", b$ti, b$tiv), sprintf("%d / %d", b$nfi, b$nfo),
+  sprintf("%s (%d)", b$to, b$tov), sprintf("%s (%d)", b$ti, b$tiv), b$hubs, sprintf("%d / %d", b$nfi, b$nfo),
   sprintf("%+d / %+d / %+d / %+d", b$net[["Trigger"]], b$net[["Natural"]], b$net[["Engineering"]], b$net[["Consequence"]]),
   b$C1, b$C2, b$C3, b$C4)
 tabB <- data.frame(Quantity = c("Nodes / edges", "Pure sources", "Top out-degree", "Top in-degree",
-  "NF in / out", "Layer net flow T/N/E/C", "C1 sources are only SEQ,EQ",
-  "C2 SEQ out-hub & CF in-hub", "C3 NF is convergence node", "C4 monotone four-layer cascade"),
+  "Hubs", "NF in / out", "Layer net flow T/N/E/C", "C1 sources are only SEQ,EQ",
+  "C2 SEQ highest out-degree, CF highest in-degree", "C3 NF is convergence node", "C4 monotone four-layer cascade"),
   `Original (58 events)` = fmt(b0), `Augmented (61 events)` = fmt(b1), check.names = FALSE)
 knitr::kable(tabB, row.names = FALSE,
-             caption = "(B) Core conclusions before and after merging the three independent events.")
+             caption = "(B) The four conclusions and the hubs before and after merging the three independent events.")
 
 ## (C) node-importance rank stability (Spearman)
 cm <- intersect(V(g_marine)$name, V(g_aug)$name)

@@ -13,8 +13,8 @@ authors:
     affiliation: "Southern University of Science and Technology"
 repository-code: "https://github.com/hazardchain/marine-seismic-hazard-chains-code-data"
 license: MIT
-version: 1.2.0
-date-released: "2026-11-09"
+version: 1.2.1
+date-released: "2026-11-11"
 keywords:
   - cascading hazards
   - disaster chain
