@@ -1,6 +1,6 @@
 {
   "title": "Code and data for: Network topology of marine seismic hazard chains and contrasts with inland earthquake chains",
-  "description": "Reproducibility deposit for the manuscript by Shi, Hu and Zhang (prepared for npj Natural Hazards). A single R Markdown document (marine_hazard_chains_reproduction.Rmd) regenerates every table and figure of the paper from the raw documented cascade tables: the marine seismic hazard-chain network (39 nodes / 152 directed edges from 366 documented chains under 58 tsunami source events), the comparison with an inland earthquake network (84 events, 500 chains) at a unified 15-class resolution, the robustness checks (event-level cluster bootstrap, edge-frequency thresholds, five-fold out-of-sample edge coverage), the independent-event test against three further tsunamis with chance baselines, the node-removal analysis, and the data of the interactive network viewer.",
+  "description": "Reproducibility deposit for the manuscript by Shi, Hu and Zhang (prepared for Natural Hazards). A single R Markdown document (marine_hazard_chains_reproduction.Rmd) regenerates every table and figure of the paper from the raw documented cascade tables: the marine seismic hazard-chain network (39 nodes / 152 directed edges from 366 documented chains under 58 tsunami source events), the comparison with an inland earthquake network (84 events, 500 chains) at a unified 15-class resolution, the robustness checks (event-level cluster bootstrap, edge-frequency thresholds, five-fold out-of-sample edge coverage), the independent-event test against three further tsunamis with chance baselines, the node-removal analysis, and the data of the interactive network viewer.",
   "creators": [
     {
       "name": "Shi, Yang",
@@ -25,5 +25,5 @@
     "complex networks",
     "marine seismic hazards"
   ],
-  "version": "1.2.1"
+  "version": "1.2.2"
 }

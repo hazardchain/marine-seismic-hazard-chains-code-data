@@ -15,7 +15,7 @@ event `ID` (first column) and the `Proposed Encoding` column.
 - `tsunami_Dohmen_2025_EQ.docx` — the marine record behind the paper: 366
   documented chains under 58 source events (57 events of the landslide-tsunami
   catalogue of Dohmen et al., 2025, and the 2011 Tohoku tsunami). It yields the
-  39-node / 152-edge network, every Table 1 degree and the Table 2 layer net flow
+  39-node / 152-edge network, every Table 3 degree and the Table 4 layer net flow
   (+42 / +1 / −16 / −27).
 - `tsunami_extra_events_2004_1960_2018_EQ.docx` — the three independent events
   of the independent-event test (2004 Indian Ocean, 1960 Valdivia, 2018 Palu), with a `Source`
@@ -34,7 +34,7 @@ event `ID` (first column) and the `Proposed Encoding` column.
   tsunami (catalogue tsunami ID 248) is listed there as three landslides; the
   `note` column says so. Nine events have a cause other than `EQ` or the status
   `erroneous entry`. They hold 14 of the 366 chains, and the reproduction
-  (chunk "Methods, Data and encoding") shows that excluding them changes none of the paper's marine
+  (chunk "Sect. 2.1, Data and encoding") shows that excluding them changes none of the paper's marine
   conclusions:
 
   | Event | Cause | Status |
@@ -65,7 +65,7 @@ Taiwan Strait event) are excluded in the code (`inland_excluded`), which leaves
 complete.
 
 ### `Aggregation of the 39 marine hazard nodes into the 15 common.docx`
-The 39 → 15 class mapping used for the marine–inland comparison (paper Table 8).
+The 39 → 15 class mapping used for the marine–inland comparison (paper Table 2).
 
 ## Edge-construction criterion
 A directed edge `i→j` is placed in the network if and only if the ordered peril
