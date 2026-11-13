@@ -3,8 +3,7 @@
 [![DOI](https://zenodo.org/badge/1285695563.svg)](https://zenodo.org/badge/latestdoi/1285695563)
 
 Reproducibility materials for *Network topology of marine seismic hazard chains and
-contrasts with inland earthquake chains* (Shi, Hu, Zhang;
-manuscript for *Natural Hazards*).
+contrasts with inland earthquake chains* (Shi, Hu, Zhang).
 
 **Interactive network viewer (Figs 1 & 2):** <https://hazardchain.github.io/marine-seismic-hazard-chains-code-data/>
 — click any node to trace its couplings; Chinese / English toggle. Source in [`docs/`](docs/).
@@ -69,9 +68,14 @@ this repository are archived on Zenodo:
 [doi:10.5281/zenodo.21316691](https://doi.org/10.5281/zenodo.21316691) (all
 versions; resolves to the latest release).
 
+## Changes in v1.2.3
+
+- **Wording only.** The deposit no longer names a target journal. No code,
+  number, table, image or viewer data changed.
+
 ## Changes in v1.2.2
 
-- **Numbering follows the manuscript prepared for *Natural Hazards*.** The
+- **Numbering follows the current manuscript.** The
   manuscript now has the order Introduction, Methods, Results, Discussion,
   Conclusions, so its tables are renumbered: peril taxonomy (Table 1),
   39 → 15 class mapping (Table 2), high-degree nodes (Table 3), four-layer net
